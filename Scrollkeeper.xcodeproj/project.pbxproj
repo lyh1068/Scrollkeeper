@@ -39,9 +39,22 @@
 		A10000000000000000000002 /* Scrollkeeper Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Scrollkeeper Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A10000000000000000000060 /* Exceptions for "Phone" folder in "Scrollkeeper" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A10000000000000000000020 /* Scrollkeeper */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A10000000000000000000003 /* Phone */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A10000000000000000000060 /* Exceptions for "Phone" folder in "Scrollkeeper" target */,
+			);
 			path = Phone;
 			sourceTree = "<group>";
 		};
@@ -309,7 +322,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = LR4NK77QV6;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Phone/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Scrollkeeper;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -336,7 +351,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = LR4NK77QV6;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Phone/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Scrollkeeper;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -364,6 +381,7 @@
 				DEVELOPMENT_TEAM = LR4NK77QV6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Scrollkeeper;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.iterlum.Scrollkeeper;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -391,6 +409,7 @@
 				DEVELOPMENT_TEAM = LR4NK77QV6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Scrollkeeper;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.iterlum.Scrollkeeper;
 				LD_RUNPATH_SEARCH_PATHS = (

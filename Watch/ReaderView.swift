@@ -10,6 +10,7 @@ struct ReaderView: View {
     @EnvironmentObject private var library: Library
     @Environment(\.scenePhase) private var scenePhase
     @State private var paragraphs: [String] = []
+    @State private var loaded = false
     @State private var position = ScrollPosition(idType: Int.self)
     @State private var offset: CGFloat = 0                    // the scroll view's content offset
     @State private var range: ClosedRange<CGFloat> = 0...0    // the offsets it can scroll between
@@ -80,6 +81,16 @@ struct ReaderView: View {
             guard showSpeed, (try? await Task.sleep(for: .seconds(1.5))) != nil else { return }
             showSpeed = false
         }
+        .overlay {
+            if !loaded {
+                ProgressView()
+            } else if paragraphs.allSatisfy(\.isEmpty) {
+                Text("This book is empty or couldn't be opened.\nTry sending it again from your iPhone.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
         .overlay(alignment: .bottom) {
             if controls {
                 controlBar
@@ -91,11 +102,11 @@ struct ReaderView: View {
                     .background(.black.opacity(0.85), in: Capsule())
             }
         }
-        .navigationTitle((name as NSString).deletingPathExtension)
         .toolbar(controls ? .visible : .hidden, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showContents = true } label: { Image(systemName: "list.bullet") }
+                    .accessibilityLabel("Chapters and bookmarks")
             }
         }
         .sheet(isPresented: $showContents) {
@@ -109,11 +120,12 @@ struct ReaderView: View {
         ._statusBarHidden(!controls)   // the clock, too; it comes back with the controls
         .task {
             let url = Library.url(name)
-            let loaded = await Task.detached { BookCodec.unpack((try? Data(contentsOf: url)) ?? Data()) }.value
-            top = min(UserDefaults.standard.integer(forKey: Library.positionKey(name)), max(loaded.count - 1, 0))
-            chapters = loaded.indices.filter { loaded[$0].first == BookCodec.chapterMark }
+            let book = await Task.detached { BookCodec.unpack((try? Data(contentsOf: url)) ?? Data()) }.value
+            top = min(UserDefaults.standard.integer(forKey: Library.positionKey(name)), max(book.count - 1, 0))
+            chapters = book.indices.filter { book[$0].first == BookCodec.chapterMark }
             bookmarks = UserDefaults.standard.array(forKey: Library.bookmarksKey(name)) as? [Int] ?? []
-            paragraphs = loaded
+            paragraphs = book
+            loaded = true
             try? await Task.sleep(for: .milliseconds(50))   // let the text lay out before jumping
             position.scrollTo(id: top, anchor: .top)
             library.markOpened(name)
@@ -195,14 +207,18 @@ struct ReaderView: View {
             HStack(spacing: 6) {
                 Button("A−") { fontSize = max(10, fontSize - 1) }
                     .frame(width: 52)
+                    .accessibilityLabel("Smaller text")
                 Text("\(top * 100 / max(paragraphs.count - 1, 1))%")
                     .frame(maxWidth: .infinity)
+                    .accessibilityLabel("\(top * 100 / max(paragraphs.count - 1, 1)) percent read")
                 Button("A+") { fontSize = min(24, fontSize + 1) }
                     .frame(width: 52)
+                    .accessibilityLabel("Larger text")
             }
             HStack(spacing: 6) {
                 Button { setSpeed(linesPerMinute - 5) } label: { Image(systemName: "minus") }
                     .frame(width: 52)
+                    .accessibilityLabel("Scroll slower")
                 Button {
                     controls = false
                     autoScroll = true
@@ -212,8 +228,10 @@ struct ReaderView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                 }
+                .accessibilityLabel("Start auto-scroll, \(linesPerMinute) lines per minute")
                 Button { setSpeed(linesPerMinute + 5) } label: { Image(systemName: "plus") }
                     .frame(width: 52)
+                    .accessibilityLabel("Scroll faster")
             }
         }
         .font(.body)

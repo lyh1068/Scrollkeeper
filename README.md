@@ -22,6 +22,8 @@ rendering on the wrist, no accounts and no cloud.
 
 **On the iPhone**
 - **Imports** `.txt`, `.md`, `.epub` and `.pdf` from the Files app and sends them to the watch.
+- **Share sheet:** share a file to Scrollkeeper from Files, Safari, Mail and other apps.
+- **Shows each book's status:** converting, waiting for the watch, on the watch, or why it couldn't be read.
 - **Cleans up text for a small screen:** re-flows hard-wrapped lines, drops blank lines, splits very long paragraphs and detects older Chinese encodings such as GBK.
 - **Finds chapters** from an EPUB's table of contents, PDF bookmarks, Markdown headings, and headings such as `Chapter 12` or `第十二章`. Printed contents pages are not mistaken for chapters.
 - **PDF:** reads the text layer, removes running headers and page numbers, and re-joins paragraphs across pages. Scanned pages are read with Apple's on-device text recognition (Vision), in Chinese and English. Nothing is uploaded, and Apple Intelligence is not required.
@@ -44,8 +46,8 @@ There are no third-party dependencies.
 
 ## Using it
 
-1. On the iPhone, tap **Send Books to Watch** and pick one or more files.
-2. On the watch, open Scrollkeeper and pick a book. Swipe left on a book to delete it.
+1. On the iPhone, tap **Send Books to Watch** and pick one or more files, or share a file to Scrollkeeper from another app.
+2. On the watch, open Scrollkeeper and pick a book. Swipe left on a book to delete it. A short guide is already there the first time you open the app.
 3. While reading:
    - Turn the crown to scroll.
    - Tap the text to show the controls: text size, auto-scroll and its speed, and the reading position.
@@ -59,10 +61,15 @@ compressed with LZMA and sent with WatchConnectivity. The watch only
 decompresses and displays, so it stays fast and simple.
 
 ```
-Phone/    iPhone app: file picker, EPUB and PDF import, sending to the watch
-Watch/    Watch app: library, reader, contents and bookmarks
-Shared/   Book format and text clean-up used by both apps, plus the icon
+Phone/      iPhone app: file picker, EPUB and PDF import, sending to the watch
+Watch/      Watch app: library, reader, contents and bookmarks, built-in guide
+Shared/     Book format and text clean-up used by both apps, the icon, privacy manifest
+AppStore/   Store listing text and screenshots
 ```
+
+## Privacy
+
+Scrollkeeper collects nothing. See [PRIVACY.md](PRIVACY.md).
 
 ## Not supported
 

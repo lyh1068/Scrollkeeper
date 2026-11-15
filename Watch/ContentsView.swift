@@ -50,7 +50,8 @@ struct ContentsView: View {
                 }
             }
             .onAppear {
-                if let current { proxy.scrollTo("chapter \(current)", anchor: .center) }
+                // In the first chapter the list already starts in the right place.
+                if let current, current != chapters.first { proxy.scrollTo("chapter \(current)", anchor: .center) }
             }
         }
     }

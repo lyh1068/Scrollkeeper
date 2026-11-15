@@ -10,6 +10,11 @@ final class Library: NSObject, ObservableObject, WCSessionDelegate {
 
     override init() {
         super.init()
+        if !UserDefaults.standard.bool(forKey: "guideAdded") {
+            UserDefaults.standard.set(true, forKey: "guideAdded")
+            let paragraphs = BookCodec.paragraphs(fromText: Data(Guide.text.utf8), markdown: true) ?? []
+            try? BookCodec.pack(paragraphs)?.write(to: Self.url(Guide.name))
+        }
         reload()
         WCSession.default.delegate = self
         WCSession.default.activate()
