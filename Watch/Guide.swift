@@ -23,10 +23,15 @@ enum Guide {
 
     # Chapters and bookmarks
     With the controls showing, tap the list button at the top to see the book's chapters and your bookmarks. Tap one to jump there, or tap **Bookmark Here** to save your place.
-    Scrollkeeper also remembers where you stopped in every book.
+    A book without chapters gets a list of places to jump to instead, from 0% to 90%.
+    Scrollkeeper also remembers where you stopped in every book, and shows how far you've read in the list of books.
+
+    # Staying in your book
+    Your watch goes back to the clock a couple of minutes after you lower your wrist. To come back to your book for up to an hour instead, open Settings on the watch and go to General, then Return to Clock. Tap Scrollkeeper, then Custom, then After 1 hour.
 
     # Adding books
     Open Scrollkeeper on your iPhone and tap **Send Books to Watch**. It takes EPUB, PDF, plain text and Markdown files. You can also share a file to Scrollkeeper from Files, Safari, Mail and other apps.
     Books are stored on your watch, so you can read without your iPhone nearby.
+    The iPhone app also lists the books on your watch. Swipe one to the left there to delete it.
     """
 }

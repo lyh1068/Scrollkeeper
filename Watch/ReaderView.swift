@@ -15,7 +15,7 @@ struct ReaderView: View {
     @State private var offset: CGFloat = 0                    // the scroll view's content offset
     @State private var range: ClosedRange<CGFloat> = 0...0    // the offsets it can scroll between
     @State private var top = 0                       // paragraph at the top of the screen
-    @State private var restoring = true              // still jumping to where you left off
+    @State private var jumping = true                // on the way to where you left off, or to a chapter
     @State private var controls = false
     @State private var autoScroll = false
     @State private var showSpeed = false
@@ -55,8 +55,9 @@ struct ReaderView: View {
         } action: { range = $1 }
         .onScrollTargetVisibilityChange(idType: Int.self, threshold: 0.01) { visible in
             guard let first = visible.min() else { return }
-            // While opening, the start of the book shows for a moment; don't save that.
-            if restoring && !visible.contains(top) { return }
+            // During a jump the scroll view still reports the place it is leaving, and
+            // sometimes nothing after that; don't take the old place for the new one.
+            if jumping && !visible.contains(top) { return }
             top = first
         }
         .font(.system(size: fontSize).width(.condensed))
@@ -113,8 +114,7 @@ struct ReaderView: View {
             ContentsView(paragraphs: paragraphs, chapters: chapters, top: top, bookmarks: $bookmarks) { index in
                 showContents = false
                 controls = false
-                top = index
-                position.scrollTo(id: index, anchor: .top)
+                Task { await jump(to: index) }
             }
         }
         ._statusBarHidden(!controls)   // the clock, too; it comes back with the controls
@@ -126,15 +126,22 @@ struct ReaderView: View {
             bookmarks = UserDefaults.standard.array(forKey: Library.bookmarksKey(name)) as? [Int] ?? []
             paragraphs = book
             loaded = true
-            try? await Task.sleep(for: .milliseconds(50))   // let the text lay out before jumping
-            position.scrollTo(id: top, anchor: .top)
+            UserDefaults.standard.set(book.count, forKey: Library.lengthKey(name))   // for the percentage in the book list
             library.markOpened(name)
             crownFocused = true
-            try? await Task.sleep(for: .milliseconds(500))
-            restoring = false
+            try? await Task.sleep(for: .milliseconds(50))   // let the text lay out before jumping
+            await jump(to: top)
         }
         .onChange(of: top) { UserDefaults.standard.set(top, forKey: Library.positionKey(name)) }
         .onChange(of: bookmarks) { UserDefaults.standard.set(bookmarks, forKey: Library.bookmarksKey(name)) }
+    }
+
+    private func jump(to index: Int) async {
+        jumping = true
+        top = index
+        position.scrollTo(id: index, anchor: .top)
+        try? await Task.sleep(for: .milliseconds(500))
+        jumping = false
     }
 
     private func crownTurned(by steps: Int) {

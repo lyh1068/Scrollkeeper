@@ -30,13 +30,14 @@ ON YOUR WATCH
 • Auto-scroll at the speed you choose. Turn the crown to go faster or slower. It pauses when you lower your wrist.
 • Full-screen text: the clock and controls hide while you read.
 • Adjustable text size.
-• Chapter list and bookmarks.
-• Remembers your place in every book.
+• Chapter list and bookmarks. Books without chapters get places to jump to instead.
+• Remembers your place in every book, and shows how far you've read.
 • Hundreds of books fit, stored on the watch.
 
 ON YOUR IPHONE
 • Imports EPUB, PDF, plain text (.txt) and Markdown (.md).
 • Share a file to Scrollkeeper from Files, Safari, Mail and other apps.
+• Lists the books on your watch with how far you've read, and lets you delete them from the phone.
 • Cleans up text for a small screen: re-flows hard-wrapped lines, removes page headers and page numbers from PDFs, and finds chapters.
 • Reads scanned PDF pages with on-device text recognition, in English and Chinese.
 • Detects older Chinese text encodings such as GBK.
@@ -63,13 +64,13 @@ Scrollkeeper's iPhone app converts book files and transfers them to the Apple Wa
 
 To test without transferring a file: open Scrollkeeper on Apple Watch. A short built-in book, "Scrollkeeper Guide", is already in the list. Open it, turn the Digital Crown to scroll, and tap the text for the controls.
 
-To test a transfer: on iPhone, tap "Send Books to Watch" and pick any .txt, .epub or .pdf file from Files. The book appears in the list on the watch.
+To test a transfer: on iPhone, tap "Send Books to Watch" and pick any .txt, .epub or .pdf file from Files. The book appears in the list on the watch, and under "On your watch" on the iPhone, where it can be swiped away to delete it from the watch.
 
 ## Screenshots
 
 | File | Shows | Size |
 |---|---|---|
-| `iphone-1-books.png` | Books sent to the watch | 1320 × 2868 (6.9-inch iPhone) |
+| `iphone-1-books.png` | The watch's books and reading progress | 1320 × 2868 (6.9-inch iPhone) |
 | `iphone-2-how-it-works.png` | First-run screen | 1320 × 2868 |
 | `watch-1-library.png` | Book list | 416 × 496 (46 mm Apple Watch) |
 | `watch-2-reading.png` | Full-screen reading | 416 × 496 |
@@ -86,7 +87,8 @@ The sample book is *Pride and Prejudice*, which is in the public domain.
    - send one book of each kind: .txt, .md, .epub, a text PDF and a scanned PDF;
    - share a PDF to Scrollkeeper from Files or Books;
    - turn the crown, start auto-scroll, add a bookmark, jump to a chapter;
-   - close and reopen the watch app and check it returns to your place.
+   - close and reopen the watch app and check it returns to your place;
+   - check the iPhone lists the watch's books, then delete one from the iPhone, once with the watch app open and once with it closed.
 4. **Upload:** in Xcode choose Any iOS Device, then Product → Archive → Distribute App → App Store Connect. The watch app is included in the same upload.
 5. **Try it through TestFlight** before submitting for review.
 6. **Fill in the listing** with the text above, upload the screenshots, answer App Privacy and the age rating, set the price and countries.

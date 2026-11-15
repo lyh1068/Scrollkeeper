@@ -16,14 +16,15 @@ rendering on the wrist, no accounts and no cloud.
 - **Auto-scroll:** from 5 to 120 lines a minute. While it runs, the crown changes the speed, and it pauses when you lower your wrist.
 - **Full-screen text:** the clock and controls hide while you read. Tap to show them.
 - **Text size:** adjustable from 10 to 24 pt, in a condensed system font (SF for Latin, PingFang for Chinese).
-- **Chapters and bookmarks:** a contents list with the current chapter highlighted, plus bookmarks with a short excerpt.
-- **Remembers your place** in every book, and reopens the last book on launch.
+- **Chapters and bookmarks:** a contents list with the current chapter highlighted, plus bookmarks with a short excerpt. A book without chapters gets places to jump to, from 0% to 90%.
+- **Remembers your place** in every book, shows how far you've read in the book list, and reopens the last book on launch.
 - **Offline library:** books are stored on the watch and compressed with LZMA, so hundreds fit easily.
 
 **On the iPhone**
 - **Imports** `.txt`, `.md`, `.epub` and `.pdf` from the Files app and sends them to the watch.
 - **Share sheet:** share a file to Scrollkeeper from Files, Safari, Mail and other apps.
 - **Shows each book's status:** converting, waiting for the watch, on the watch, or why it couldn't be read.
+- **Manages the watch's books:** lists what is on the watch with how far each has been read, and deletes books from there.
 - **Cleans up text for a small screen:** re-flows hard-wrapped lines, drops blank lines, splits very long paragraphs and detects older Chinese encodings such as GBK.
 - **Finds chapters** from an EPUB's table of contents, PDF bookmarks, Markdown headings, and headings such as `Chapter 12` or `第十二章`. Printed contents pages are not mistaken for chapters.
 - **PDF:** reads the text layer, removes running headers and page numbers, and re-joins paragraphs across pages. Scanned pages are read with Apple's on-device text recognition (Vision), in Chinese and English. Nothing is uploaded, and Apple Intelligence is not required.
@@ -47,7 +48,7 @@ There are no third-party dependencies.
 ## Using it
 
 1. On the iPhone, tap **Send Books to Watch** and pick one or more files, or share a file to Scrollkeeper from another app.
-2. On the watch, open Scrollkeeper and pick a book. Swipe left on a book to delete it. A short guide is already there the first time you open the app.
+2. On the watch, open Scrollkeeper and pick a book. Swipe left on a book to delete it, there or in the iPhone's list. A short guide is already there the first time you open the app.
 3. While reading:
    - Turn the crown to scroll.
    - Tap the text to show the controls: text size, auto-scroll and its speed, and the reading position.
@@ -58,10 +59,12 @@ There are no third-party dependencies.
 The iPhone does all of the parsing. Each book becomes a list of paragraphs,
 one per line, with chapter headings marked by a `U+0001` prefix. The list is
 compressed with LZMA and sent with WatchConnectivity. The watch only
-decompresses and displays, so it stays fast and simple.
+decompresses and displays, so it stays fast and simple. It tells the iPhone
+which books it has and how far each has been read; the iPhone sends back
+requests to delete.
 
 ```
-Phone/      iPhone app: file picker, EPUB and PDF import, sending to the watch
+Phone/      iPhone app: file picker, EPUB and PDF import, sending to the watch, the watch's book list
 Watch/      Watch app: library, reader, contents and bookmarks, built-in guide
 Shared/     Book format and text clean-up used by both apps, the icon, privacy manifest
 AppStore/   Store listing text and screenshots

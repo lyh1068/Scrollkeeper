@@ -2,8 +2,9 @@ import SwiftUI
 import UniformTypeIdentifiers
 import WatchConnectivity
 
-/// The iPhone side does one thing: take books (picked here, or shared from another app),
-/// turn them into plain paragraphs and send them to the watch.
+/// The iPhone side takes books (picked here, or shared from another app), turns them
+/// into plain paragraphs and sends them to the watch. It also lists the books the watch
+/// says it has, so they can be deleted from here.
 @main
 struct ScrollkeeperPhoneApp: App {
     @StateObject private var sender = Sender()
@@ -30,14 +31,33 @@ struct ScrollkeeperPhoneApp: App {
                         Section { Label(problem, systemImage: "exclamationmark.triangle").foregroundStyle(.orange) }
                     }
 
-                    if sender.books.isEmpty {
+                    if !sender.books.isEmpty {
+                        Section("Sending") { ForEach(sender.books, content: row) }
+                    }
+                    if !sender.onWatch.isEmpty {
+                        Section {
+                            ForEach(sender.onWatch) { book in
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(Sender.title(book.id)).lineLimit(2)
+                                    Text(book.percent.map { "\($0)% read" } ?? "Not opened yet")
+                                        .font(.footnote).foregroundStyle(.secondary)
+                                }
+                                .swipeActions {
+                                    Button("Delete", role: .destructive) { sender.deleteFromWatch(book.id) }
+                                }
+                            }
+                        } header: {
+                            Text("On your watch")
+                        } footer: {
+                            Text("Swipe a book to the left to delete it from your watch.")
+                        }
+                    }
+                    if sender.books.isEmpty && sender.onWatch.isEmpty {
                         Section("How it works") {
                             Label("Pick books here. They're turned into plain text made for a small screen.", systemImage: "1.circle")
                             Label("They're sent to your Apple Watch and stored there, so you can read without your iPhone.", systemImage: "2.circle")
                             Label("Open Scrollkeeper on your watch and turn the Digital Crown to read.", systemImage: "3.circle")
                         }
-                    } else {
-                        Section("Books") { ForEach(sender.books, content: row) }
                     }
                 }
                 .navigationTitle("Scrollkeeper")
@@ -63,6 +83,12 @@ struct ScrollkeeperPhoneApp: App {
             }
         }
         .accessibilityElement(children: .combine)
+        .swipeActions {
+            // Not while it is being converted: that work can't be stopped halfway.
+            if case .working = book.state {} else {
+                Button("Remove", role: .destructive) { sender.remove(book) }
+            }
+        }
     }
 }
 
@@ -74,6 +100,11 @@ final class Sender: NSObject, ObservableObject, WCSessionDelegate, @unchecked Se
         let id: String
         var title: String
         var state: State
+        var file = ""   // its name on the watch, once converted
+    }
+    struct WatchBook: Identifiable {
+        let id: String      // its file name on the watch
+        let percent: Int?   // how far it has been read; nil until it is opened
     }
     enum State {
         case working(String), waiting, sent, failed(String)
@@ -87,7 +118,8 @@ final class Sender: NSObject, ObservableObject, WCSessionDelegate, @unchecked Se
         }
     }
 
-    @Published var books: [Book] = []
+    @Published var books: [Book] = []          // being converted or sent
+    @Published var onWatch: [WatchBook] = []   // what the watch last said it has
     @Published var watchProblem: String?
 
     /// Converted books wait here until the watch has taken them, which can be much later.
@@ -129,7 +161,7 @@ final class Sender: NSObject, ObservableObject, WCSessionDelegate, @unchecked Se
                     self.update(id) { $0.state = .failed(Self.whyUnreadable(url)) }
                     continue
                 }
-                self.update(id) { $0.title = Self.title(book.name); $0.state = .waiting }
+                self.update(id) { $0.title = Self.title(book.name); $0.file = book.name; $0.state = .waiting }
                 // Opened from a share sheet, the app may have only just started.
                 for _ in 0..<50 where WCSession.default.activationState != .activated {
                     try? await Task.sleep(for: .milliseconds(100))
@@ -147,7 +179,41 @@ final class Sender: NSObject, ObservableObject, WCSessionDelegate, @unchecked Se
         }
     }
 
-    private static func title(_ fileName: String) -> String { (fileName as NSString).deletingPathExtension }
+    static func title(_ fileName: String) -> String { (fileName as NSString).deletingPathExtension }
+
+    /// Takes a row off the list. A book still waiting for the watch is not sent after all.
+    func remove(_ book: Book) {
+        WCSession.default.outstandingFileTransfers.first { $0.file.fileURL.lastPathComponent == book.id }?.cancel()
+        try? FileManager.default.removeItem(at: Self.outbox.appendingPathComponent(book.id))
+        books.removeAll { $0.id == book.id }
+    }
+
+    /// Done straight away if the watch app is open. Otherwise the request waits in a
+    /// queue and is carried out when the watch is next in reach.
+    func deleteFromWatch(_ name: String) {
+        let session = WCSession.default, request = ["delete": name]
+        if session.isReachable {
+            session.sendMessage(request, replyHandler: nil) { _ in session.transferUserInfo(request) }
+        } else {
+            session.transferUserInfo(request)
+        }
+        onWatch.removeAll { $0.id == name }
+    }
+
+    /// The watch's own list, without the books it has been asked to delete but hasn't yet.
+    private func showWatchBooks(_ session: WCSession) {
+        let deleting = Set(session.outstandingUserInfoTransfers.filter(\.isTransferring).compactMap { $0.userInfo["delete"] as? String })
+        let percent = session.receivedApplicationContext["percent"] as? [String: Int] ?? [:]
+        let list = (session.receivedApplicationContext["books"] as? [String] ?? [])
+            .filter { !deleting.contains($0) }
+            .map { WatchBook(id: $0, percent: percent[$0]) }
+        DispatchQueue.main.async {
+            self.onWatch = list
+            // A sent book has arrived once the watch lists it; its row here has done its job.
+            let arrived = Set(list.map(\.id))
+            self.books.removeAll { if case .sent = $0.state { arrived.contains($0.file) } else { false } }
+        }
+    }
 
     private static func whyUnreadable(_ url: URL) -> String {
         switch url.pathExtension.lowercased() {
@@ -165,7 +231,7 @@ final class Sender: NSObject, ObservableObject, WCSessionDelegate, @unchecked Se
         let waiting = session.outstandingFileTransfers.filter(\.isTransferring)
         let rows = waiting.map { transfer -> Book in
             let name = transfer.file.metadata?["name"] as? String ?? ""
-            return Book(id: transfer.file.fileURL.lastPathComponent, title: Self.title(name), state: .waiting)
+            return Book(id: transfer.file.fileURL.lastPathComponent, title: Self.title(name), state: .waiting, file: name)
         }
         DispatchQueue.main.async {
             self.books += rows.filter { row in !self.books.contains { $0.id == row.id } }
@@ -176,6 +242,16 @@ final class Sender: NSObject, ObservableObject, WCSessionDelegate, @unchecked Se
             }
         }
         checkWatch(session)
+        showWatchBooks(session)
+    }
+
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        showWatchBooks(session)
+    }
+
+    /// A delete that couldn't be delivered: the book is still on the watch, so list it again.
+    func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
+        if error != nil { showWatchBooks(session) }
     }
 
     func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: Error?) {

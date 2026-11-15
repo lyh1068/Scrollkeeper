@@ -36,6 +36,15 @@ struct ContentsView: View {
                     }
                 }
 
+                if chapters.isEmpty && paragraphs.count >= 100 {
+                    // Without chapters there would be no way to move far through a long book.
+                    Section("Jump to") {
+                        ForEach(0..<10) { tenth in
+                            Button("\(tenth * 10)%") { jump((paragraphs.count - 1) * tenth / 10) }
+                        }
+                    }
+                }
+
                 if !chapters.isEmpty {
                     Section("Chapters") {
                         ForEach(chapters, id: \.self) { index in
