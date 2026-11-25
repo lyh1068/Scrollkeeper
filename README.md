@@ -79,3 +79,7 @@ Scrollkeeper collects nothing. See [PRIVACY.md](PRIVACY.md).
 - MOBI/AZW and other formats. Convert them to EPUB first, for example with Calibre.
 - Copy-protected (DRM) books.
 - Images, tables and rich formatting. Only text and chapter headings are kept.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
